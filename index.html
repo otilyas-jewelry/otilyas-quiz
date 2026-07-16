@@ -63,10 +63,10 @@
 
   /* כפתור מוזיקה — קו מתפתל שזז עם המוזיקה + חיווי */
   .music-dock{position:fixed;bottom:22px;inset-inline-start:22px;z-index:6;display:flex;align-items:center;gap:11px;}
-  .music-btn{border:none;background:none;cursor:pointer;padding:0;width:70px;height:28px;opacity:.7;transition:opacity .4s;}
+  .music-btn{border:none;background:none;cursor:pointer;padding:0;width:84px;height:30px;opacity:.9;transition:opacity .4s;}
   .music-btn:hover{opacity:1;}
-  .music-btn.on{opacity:.95;}
-  .music-btn canvas{display:block;width:70px;height:28px;}
+  .music-btn.on{opacity:1;}
+  .music-btn canvas{display:block;width:84px;height:30px;}
   .music-hint{font-size:12px;letter-spacing:.1em;color:var(--muted);white-space:nowrap;animation:hintpulse 2.6s ease-in-out infinite;transition:opacity .7s;}
   .music-hint.gone{opacity:0;}
   @keyframes hintpulse{0%,100%{opacity:.4;}50%{opacity:.85;}}
@@ -351,7 +351,7 @@
 <body>
 <video class="bg-video" src="assets/quiz-intro.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
 <div class="music-dock">
-  <button id="musicBtn" class="music-btn on" aria-label="מוזיקה" onclick="toggleMusic()"><canvas id="musicWave" width="140" height="56"></canvas></button>
+  <button id="musicBtn" class="music-btn on" aria-label="מוזיקה" onclick="toggleMusic()"><canvas id="musicWave" width="168" height="60"></canvas></button>
   <span id="musicHint" class="music-hint"></span>
 </div>
 <div class="mat"><div class="frame">
@@ -965,18 +965,20 @@ document.addEventListener('touchstart', firstGesture);
 
 // ===== פסי סאונד שזזים עם המוזיקה =====
 const _cv=document.getElementById('musicWave'), _cx=_cv.getContext('2d');
-const _BINS=[2,3,5,8,12,18], _barH=[.12,.12,.12,.12,.12,.12]; let _freq=null;
+const _BINS=[2,3,5,8,12,18], _barH=[.2,.2,.2,.2,.2,.2]; let _freq=null, _t=0;
 function drawWave(){
   requestAnimationFrame(drawWave);
+  _t += 0.045;
   const w=_cv.width, h=_cv.height, n=_BINS.length;
   _cx.clearRect(0,0,w,h);
   _cx.fillStyle = musicOn ? '#171512' : '#9b958a';
   if (analyser && musicOn){ if(!_freq) _freq=new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(_freq); }
   const bw = Math.max(2.5, w*0.028), gap=(w - n*bw)/(n+1); // דק ומינימליסטי
   for (let i=0;i<n;i++){
-    let target = 0.10;
-    if (analyser && musicOn && _freq) target = Math.max(0.10, Math.min(1, _freq[_BINS[i]]/205));
-    _barH[i] += (target - _barH[i]) * 0.28;         // תנועה חלקה עם המוזיקה
+    // רצפה גלית עדינה — הסימן תמיד נראה וזז, גם בשקט ובכל מסך
+    let target = 0.26 + 0.13*Math.sin(_t + i*0.9);
+    if (analyser && musicOn && _freq) target = Math.max(target, Math.min(1, _freq[_BINS[i]]/205));
+    _barH[i] += (target - _barH[i]) * 0.22;         // תנועה חלקה עם המוזיקה
     const bh = Math.max(3, _barH[i]*(h-8));
     const x = gap + i*(bw+gap), y=(h-bh)/2, r=Math.min(bw/2, bh/2);
     _cx.beginPath();
