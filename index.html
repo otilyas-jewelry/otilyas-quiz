@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>איזו תנועה מייצגת אותך? · Which movement is yours? — OTILYAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500&family=Playpen+Sans+Hebrew:wght@300;400&family=Playpen+Sans:wght@300;400&family=Parisienne&family=Fira+Code:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf8f3;
+    --ink:#171512;
+    --muted:#6f6a5f;
+    --hair:#d9d3c6;
+    --soft:#4d483f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Assistant',-apple-system,'Segoe UI',sans-serif;
+    font-weight:300;
+    font-size:18px;
+    letter-spacing:.015em;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:22px 14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* וידאו רקע — נוכחות עדינה מאוד של תנועה */
+  .bg-video{
+    position:fixed;
+    inset:0;
+    width:100vw;
+    height:100vh;
+    object-fit:cover;
+    opacity:.09;
+    filter:grayscale(35%);
+    pointer-events:none;
+    z-index:0;
+  }
+  /* מסגרת פספרטו — כמו כרטיס תערוכה */
+  .mat{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:680px;
+    border:1px solid var(--ink);
+    padding:7px;
+    background:transparent;
+  }
+  .frame{
+    border:1px solid var(--hair);
+    padding:0 clamp(22px,6vw,58px) 56px;
+    display:flex;
+    flex-direction:column;
+    min-height:calc(100vh - 60px);
+  }
+
+  /* כפתור מוזיקה — קו מתפתל שזז עם המוזיקה + חיווי */
+  .music-dock{position:fixed;bottom:22px;inset-inline-start:22px;z-index:6;display:flex;align-items:center;gap:11px;}
+  .music-btn{border:none;background:none;cursor:pointer;padding:0;width:70px;height:28px;opacity:.7;transition:opacity .4s;}
+  .music-btn:hover{opacity:1;}
+  .music-btn.on{opacity:.95;}
+  .music-btn canvas{display:block;width:70px;height:28px;}
+  .music-hint{font-size:12px;letter-spacing:.1em;color:var(--muted);white-space:nowrap;animation:hintpulse 2.6s ease-in-out infinite;transition:opacity .7s;}
+  .music-hint.gone{opacity:0;}
+  @keyframes hintpulse{0%,100%{opacity:.4;}50%{opacity:.85;}}
+
+  /* ---- בורר שפה ---- */
+  .langtoggle{
+    text-align:center;
+    padding:22px 0 0;
+    letter-spacing:.02em;
+  }
+  .langtoggle button{
+    background:none;border:none;cursor:pointer;
+    font-family:'Assistant',sans-serif;
+    font-size:14px;font-weight:400;
+    color:var(--muted);
+    padding:4px 6px;
+    transition:color .3s;
+  }
+  .langtoggle button.active{color:var(--ink);border-bottom:1px solid var(--ink);}
+  .langtoggle .sep{color:var(--hair);margin:0 4px;}
+
+  .brand{
+    text-align:center;
+    letter-spacing:.6em;
+    text-indent:.6em;
+    font-size:16px;
+    font-weight:400;
+    padding:30px 0 14px;
+  }
+  .brand-sub{
+    text-align:center;
+    font-family:'Fira Code',monospace;
+    font-weight:300;
+    font-size:11px;
+    letter-spacing:.3em;
+    text-indent:.3em;
+    color:var(--muted);
+    padding-bottom:44px;
+  }
+  /* כתב יד — הנגיעה האישית (עברית ואנגלית) */
+  .hand{font-family:'Playpen Sans Hebrew',cursive;font-weight:300;}
+  html[lang="en"] .hand{font-family:'Playpen Sans','Playpen Sans Hebrew',cursive;}
+  .screen{display:none;animation:rise .8s cubic-bezier(.2,.7,.2,1) both;}
+  .screen.on{display:block;}
+  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+
+  /* ---- פתיחה ---- */
+  .intro{text-align:center;padding-top:6vh;}
+  .intro .kicker{font-size:14px;color:var(--muted);letter-spacing:.14em;margin-bottom:26px;animation:rise .8s .15s both;}
+  .intro h1{
+    font-size:clamp(38px,8.5vw,57px);
+    font-weight:200;
+    letter-spacing:.03em;
+    line-height:1.35;
+    animation:rise .8s .3s both;
+  }
+  .intro .sub{
+    font-size:clamp(18px,4.3vw,21px);
+    line-height:2.1;
+    color:var(--soft);
+    margin:30px auto 0;
+    max-width:440px;
+    animation:rise .8s .6s both;
+  }
+  .hairline{width:64px;height:1px;background:var(--ink);opacity:.35;margin:40px auto;animation:rise .8s .6s both;}
+  .btn{
+    display:inline-block;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:400;
+    letter-spacing:.16em;
+    color:var(--paper);
+    background:linear-gradient(180deg,#8c8578 0%,#6f6a5f 100%);
+    border:1px solid #6a6559;
+    border-radius:3px;
+    padding:18px 62px;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(77,72,63,.28), inset 0 1px 0 rgba(255,255,255,.22);
+    transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .35s,filter .35s;
+    animation:rise .8s .7s both;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(77,72,63,.34), inset 0 1px 0 rgba(255,255,255,.25);filter:brightness(1.04);}
+  .btn:active{transform:translateY(0);box-shadow:0 3px 9px rgba(77,72,63,.26), inset 0 1px 0 rgba(255,255,255,.18);}
+  .note{font-size:14px;color:var(--muted);margin-top:26px;animation:rise .8s .85s both;}
+  .link-soft{
+    display:inline-block;
+    background:none;border:none;
+    font-family:inherit;font-size:14px;font-weight:300;
+    letter-spacing:.05em;color:var(--muted);
+    text-decoration:none;cursor:pointer;
+    margin-top:30px;
+    border-bottom:1px solid var(--hair);
+    padding-bottom:3px;
+    transition:color .3s,border-color .3s;
+    animation:rise .8s .95s both;
+  }
+  .link-soft:hover{color:var(--ink);border-color:var(--ink);}
+
+  /* ---- עליי ---- */
+  .about{text-align:center;padding-top:6vh;}
+  .about .kicker{font-size:14px;color:var(--muted);letter-spacing:.22em;margin-bottom:34px;animation:rise .8s .1s both;}
+  .about-text{
+    font-size:clamp(18px,4.3vw,21px);
+    line-height:2.15;
+    color:var(--soft);
+    max-width:440px;
+    margin:0 auto;
+    animation:rise .8s .3s both;
+  }
+  .about-text .hand{color:var(--ink);}
+  .about-name{
+    display:block;
+    font-family:'Assistant',sans-serif;
+    font-weight:200;
+    font-size:clamp(30px,7vw,42px);
+    letter-spacing:.03em;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  .about-choice{
+    font-size:clamp(17px,4.1vw,20px);
+    line-height:2.05;
+    color:var(--soft);
+    max-width:440px;
+    margin:34px auto 0;
+    animation:rise .8s .58s both;
+  }
+  .signature{
+    font-family:'Parisienne',cursive;
+    font-size:clamp(46px,11vw,66px);
+    line-height:1;
+    color:var(--ink);
+    margin-top:34px;
+    animation:rise .8s .68s both;
+  }
+  .about-creed{
+    font-size:clamp(19px,4.6vw,23px);
+    line-height:1.9;
+    color:var(--ink);
+    max-width:440px;
+    margin:38px auto 0;
+    padding-top:34px;
+    border-top:1px solid var(--hair);
+    animation:rise .8s .5s both;
+  }
+  .about-sign{
+    letter-spacing:.4em;text-indent:.4em;
+    font-size:13px;font-weight:400;color:var(--muted);
+    margin-top:8px;
+    animation:rise .8s .74s both;
+  }
+  .about .hairline{animation:rise .8s .8s both;}
+  .about .btn{animation:rise .8s .88s both;}
+
+  /* ---- שאלון ---- */
+  .progress{display:flex;align-items:center;gap:16px;margin:30px 0 44px;}
+  .progress .num{
+    font-family:'Fira Code',monospace;
+    font-weight:400;
+    font-size:14px;
+    color:var(--muted);
+    letter-spacing:.1em;
+    white-space:nowrap;
+  }
+  .progress .track{flex:1;height:1px;background:var(--hair);position:relative;}
+  .progress .fill{position:absolute;top:0;inset-inline-start:0;height:1px;background:var(--ink);transition:width .5s cubic-bezier(.2,.7,.2,1);}
+  .q{
+    font-size:clamp(27px,6.2vw,34px);
+    font-weight:200;
+    letter-spacing:.03em;
+    line-height:1.5;
+    margin-bottom:38px;
+  }
+  .opts{display:flex;flex-direction:column;gap:12px;}
+  .opt{
+    font-family:inherit;
+    font-size:18px;
+    font-weight:400;
+    text-align:start;
+    line-height:1.75;
+    background:transparent;
+    border:1px solid var(--hair);
+    color:var(--ink);
+    padding:18px 22px;
+    cursor:pointer;
+    transition:border-color .3s,background .3s,color .3s;
+  }
+  .opt:hover{border-color:var(--ink);}
+  .opt.picked{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .backwrap{text-align:center;margin-top:26px;}
+  .back-btn{
+    background:none;border:none;cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:300;
+    letter-spacing:.08em;color:var(--muted);
+    padding-bottom:3px;border-bottom:1px solid var(--hair);
+    transition:color .3s,border-color .3s;
+  }
+  .back-btn:hover{color:var(--ink);border-color:var(--ink);}
+
+  /* ---- תוצאה — כרטיס תערוכה ---- */
+  .result .kicker{font-size:15px;letter-spacing:.14em;color:var(--muted);margin:34px 0 12px;animation:rise .8s .1s both;}
+  .result h2{
+    font-size:clamp(42px,9.5vw,61px);
+    font-weight:200;
+    letter-spacing:.04em;
+    line-height:1.3;
+    animation:rise .8s .25s both;
+  }
+  .result .words{
+    font-family:'Fira Code',monospace;
+    font-weight:300;
+    font-size:13.5px;
+    letter-spacing:.18em;
+    color:var(--muted);
+    margin:14px 0 42px;
+    animation:rise .8s .4s both;
+  }
+  .result .story{font-size:clamp(18px,4.3vw,21px);line-height:2.15;animation:rise .8s .55s both;}
+  .result .song{
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+    margin:42px 0;padding:34px 6px;
+    font-family:'Playpen Sans Hebrew',cursive;
+    font-weight:300;color:var(--soft);
+    font-size:clamp(16px,4vw,19px);line-height:2.1;
+    animation:rise .8s .7s both;
+  }
+  html[lang="en"] .result .song{font-family:'Playpen Sans','Playpen Sans Hebrew',cursive;}
+  .result .song .credit{display:block;font-family:'Assistant',sans-serif;font-weight:300;letter-spacing:.1em;font-size:14px;color:var(--muted);margin-top:14px;}
+  .result .models{animation:rise .8s .8s both;}
+  .result .models b{font-weight:400;letter-spacing:.1em;font-size:15px;display:block;margin-bottom:10px;}
+  .result .models span{
+    font-family:'Fira Code',monospace;
+    font-weight:300;
+    font-size:13.5px;
+    letter-spacing:.06em;
+    line-height:2.1;
+    color:var(--soft);
+  }
+
+  /* ---- טופס ---- */
+  .invite{margin-top:48px;border:1px solid var(--ink);padding:7px;animation:rise .8s .9s both;}
+  .invite-inner{border:1px solid var(--hair);padding:32px 26px;}
+  .invite p{font-size:18px;font-weight:400;line-height:1.9;margin-bottom:24px;}
+  .field{
+    width:100%;font-family:inherit;font-size:18px;font-weight:400;
+    background:transparent;border:none;border-bottom:1px solid var(--hair);
+    padding:14px 2px;margin-bottom:20px;color:var(--ink);border-radius:0;
+    text-align:start;
+  }
+  .field:focus{outline:none;border-bottom-color:var(--ink);}
+  .field::placeholder{color:var(--muted);}
+  .invite .btn{width:100%;animation:none;}
+  .form-note{font-size:14.5px;color:var(--muted);margin-top:16px;line-height:1.8;}
+  .err{font-size:16px;color:#8c3b2e;margin-top:14px;display:none;}
+
+  /* ---- סיום ---- */
+  .done{text-align:center;padding-top:10vh;}
+  .done h2{font-size:clamp(30px,7vw,42px);font-weight:200;letter-spacing:.04em;line-height:1.45;animation:rise .8s .2s both;}
+  .done p{font-size:19px;color:var(--soft);line-height:2.1;margin-top:24px;animation:rise .8s .4s both;}
+  .again{background:none;border:none;font-family:inherit;font-size:16px;color:var(--muted);text-decoration:underline;cursor:pointer;animation:rise .8s .7s both;}
+
+  .foot{
+    margin-top:auto;
+    text-align:center;
+    padding-top:56px;
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:.25em;
+    text-indent:.25em;
+  }
+  .foot .pilot{
+    display:block;
+    font-family:'Fira Code',monospace;
+    font-weight:300;
+    letter-spacing:.15em;
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:10px;
+  }
+</style>
+</head>
+<body>
+<video class="bg-video" src="assets/quiz-intro.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+<div class="music-dock">
+  <button id="musicBtn" class="music-btn on" aria-label="מוזיקה" onclick="toggleMusic()"><canvas id="musicWave" width="140" height="56"></canvas></button>
+  <span id="musicHint" class="music-hint"></span>
+</div>
+<div class="mat"><div class="frame">
+
+  <div class="langtoggle">
+    <button id="langHe" onclick="setLang('he')">עברית</button>
+    <span class="sep">·</span>
+    <button id="langEn" onclick="setLang('en')">English</button>
+  </div>
+
+  <div class="brand">OTILYAS</div>
+  <div class="brand-sub">HANDMADE · TEL AVIV</div>
+
+  <!-- פתיחה -->
+  <section id="intro" class="screen on intro">
+    <div class="kicker" id="introKicker"></div>
+    <h1 id="introH1"></h1>
+    <p class="sub" id="introSub"></p>
+    <div class="hairline"></div>
+    <button class="btn" id="startBtn" onclick="startQuiz()"></button>
+    <div class="note" id="introNote"></div>
+    <button class="link-soft" id="aboutLink" onclick="show('about')"></button>
+  </section>
+
+  <!-- עליי -->
+  <section id="about" class="screen about">
+    <div class="kicker" id="aboutKicker"></div>
+    <p class="about-text" id="aboutText"></p>
+    <p class="about-creed hand" id="aboutCreed"></p>
+    <p class="about-choice" id="aboutChoice"></p>
+    <div class="signature">Tali</div>
+    <div class="about-sign">OTILYAS.</div>
+    <div class="hairline"></div>
+    <button class="btn" id="aboutBtn" onclick="show('intro')"></button>
+    <a class="link-soft" id="siteLink" href="https://otilyas.com" target="_blank" rel="noopener"></a>
+  </section>
+
+  <!-- שאלון -->
+  <section id="quiz" class="screen">
+    <div class="progress">
+      <span class="num" id="qnum">№ 1 / 5</span>
+      <div class="track"><div class="fill" id="qfill" style="width:0%"></div></div>
+    </div>
+    <div id="qbody"></div>
+  </section>
+
+  <!-- תוצאה -->
+  <section id="result" class="screen result">
+    <div class="kicker" id="resultKicker"></div>
+    <h2 id="rname"></h2>
+    <div class="words" id="rwords"></div>
+    <div class="story" id="rstory"></div>
+    <div class="song"><span id="rsong"></span><span class="credit" id="songCredit"></span></div>
+    <div class="models"><b id="modelsLabel"></b><span id="rmodels"></span></div>
+    <div class="invite"><div class="invite-inner">
+      <p id="inviteP"></p>
+      <form id="subform" onsubmit="return subscribe(event)">
+        <input class="field" type="text" id="fname" autocomplete="given-name">
+        <input class="field" type="email" id="femail" required autocomplete="email">
+        <button class="btn" type="submit" id="sendbtn"></button>
+        <div class="err" id="formerr"></div>
+        <div class="form-note" id="formNote"></div>
+      </form>
+    </div></div>
+  </section>
+
+  <!-- סיום -->
+  <section id="done" class="screen done">
+    <h2 id="doneH2"></h2>
+    <p id="doneP"></p>
+    <div class="hairline"></div>
+    <button class="again" id="againBtn" onclick="location.reload()"></button>
+  </section>
+
+  <div class="foot"><a href="https://otilyas.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">OTILYAS.</a><span class="pilot">PILOT EDITION — № 001</span></div>
+</div></div>
+
+<script>
+const KLAVIYO_COMPANY_ID = 'U37NTj';
+const KLAVIYO_LIST_ID = 'UvcHdj'; // פיילוט — מנוע הטמפרמנט
+
+// שם הטמפרמנט הקנוני (עברית) — לשמירה אחידה ב-Klaviyo בכל שפה
+const CANON = { K:'הקלאסית', D:'הדינמית', A:'ההרפתקנית', H:'ההוליסטית', V:'הוורסטילית', N:'הנצחית' };
+
+// ===== תרגומים =====
+const T = {
+  he: {
+    dir:'rtl',
+    introKicker:'חמש שאלות קצרות. אין תשובות נכונות או לא נכונות. <span class="hand">יש אותך.</span>',
+    introH1:'איזו תנועה מייצגת אותך?',
+    introSub:'כל תכשיט שאני מפסלת הוא יחיד במינו, בדיוק כפי שאת.<br>אני מתחילה מקו ישר ונעה איתו במרחב.<br>הוא יכול להישאר ישר, להתפתל, להסתלסל,<br>להיות רגע באינסוף.<br><span class="hand">גם לך יש קו משלך.</span>',
+    startBtn:'בואי נגלה אותו יחד',
+    introNote:'פחות מדקה. התוצאה מחכה בסוף.',
+    aboutLink:'מי אני →',
+    aboutKicker:'עליי',
+    aboutText:'<span class="about-name">שמי טלי.</span>אני אמנית, אמא, בת זוג ואישה עם חופש בחירה ותודעה,<br>ואני מכינה כל תכשיט בעבודת יד.<br><br>כל תנועה בתכשיטים מייצגת עבורי<br>קו תודעתי עמוק של תנועה במרחב.<br><br>אני מאמינה שהחיים שלנו הם הזדמנות נהדרת<br>לחוות את הרגשות והרצונות שלנו.<br>ואני מאמינה בכל ליבי שכדי לחיות אותם באמת,<br>צריך לחיות בשלמות עוצמתית עם עצמך.<br>לאהוב את מי שאת — שלמה, אך לא מושלמת.<br><br>בשפת התכשיט אני משרישה משמעות בעולם,<br>ומעבירה מסר לכל אחת:<br><span class="hand">תאהבי אותך כפי שאת.</span><br><br>את הקו הפיסולי שלי אני משייכת לעוצמה שבשקט —<br>העוצמה שבנוכחות.<br>אני מקפיאה רגע בזמן,<br>ומנכיחה את עומק התנועה במרחב, ונותנת לה חיים.',
+    aboutCreed:'אני מאמינה שלכל אישה יש קו משלה.<br>החופש לבחור אותו, והחופש לחיות ולאהוב אותו.',
+    aboutChoice:'הקו של התכשיט שבחרת הוא כמו חתימה אישית שלך.<br>מה שבחרת לא יהיה של אף אחת — אין שניים זהים.<br>נולד פעם אחת תחת ידיי, ושייך רק לך.',
+    aboutBtn:'לגלות את הקו שלי',
+    siteLink:'לאתר של OTILYAS →',
+    resultKicker:'התנועה שלך היא',
+    songCredit:'מתוך הספרון של טלי',
+    modelsLabel:'הדגמים שנבחרו לקולקציה שלך',
+    inviteP:'רוצה שהסיפור המלא של הקולקציה שלך יגיע אלייך?',
+    phName:'השם שלך',
+    phEmail:'המייל שלך',
+    sendBtn:'שלחי לי את הסיפור',
+    sendingBtn:'רגע…',
+    formErr:'משהו לא הסתדר. אפשר לנסות שוב?',
+    formNote:'בלי ספאם. רק סיפורים, פעם בכמה זמן. אפשר לרדת מהרשימה בכל רגע.',
+    doneH2:'הסיפור בדרך אלייך.',
+    doneP:'תסתכלי בתיבת המייל בעוד רגע.<br><span class="hand">מה שאת בוחרת שייך רק לך.</span>',
+    againBtn:'לעשות את השאלון שוב',
+    backBtn:'חזרה',
+    musicHint:'לחצי להאזנה',
+    questions:[
+      { q:'איך את נכנסת לחדר?', opts:[
+        ['בבטחה. אני יודעת מה מתאים לי, ונשארת נאמנה לזה.','K'],
+        ['ככה, על הדרך. תמיד בדרך ל"חדר הבא".','D'],
+        ['לא מבקשת רשות. נכנסת שירגישו בנוכחותי.','A'],
+        ['לאט לאט. קודם נושמת את החדר, ואז נכנסת לתוכו.','H'],
+        ['תלוי בסוג החדר. אני מתאימה את עצמי לחדר.','V'],
+        ['בשקט. הנוכחות שלי מדברת בפני עצמה.','N'],
+      ]},
+      { q:'איזה קו הכי דומה לך?', opts:[
+        ['ישר. נקי. בלי קישוט מיותר.','K'],
+        ['מתעקל וממשיך. לא עוצר.','D'],
+        ['מתפרץ. גועש. לא מבקש רשות.','A'],
+        ['מתפתל סביב משהו יפה. רוקד איתו.','H'],
+        ['משתנה. פעם כך, פעם אחרת.','V'],
+        ['אינסופי. בלי התחלה ובלי סוף.','N'],
+      ]},
+      { q:'הבוקר שלך מתחיל ב…', opts:[
+        ['אותו ריטואל מדויק. זה שעובד.','K'],
+        ['רשימה. ואז לזוז.','D'],
+        ['מה שבא. הבוקר עוד לא יודע מה מחכה לו.','A'],
+        ['קפה בשקט. לנשום את הרגע.','H'],
+        ['תלוי מה היום מבקש ממני.','V'],
+        ['כמו אתמול. הדברים הטובים נשארים.','N'],
+      ]},
+      { q:'חברה טובה תגיד עלייך…', opts:[
+        ['"היא נאמנה לעצמה. תמיד."','K'],
+        ['"אי אפשר להדביק אותה."','D'],
+        ['"היא לא מתנצלת על מי שהיא."','A'],
+        ['"לידה הזמן נעצר קצת."','H'],
+        ['"אלף נשים באחת. וכולן היא."','V'],
+        ['"מילה שלה זו מילה. גם אחרי שנים."','N'],
+      ]},
+      { q:'איזו שורה הכי שלך?', opts:[
+        ['"נשארת נאמנה לעצמך, לדרך."','K'],
+        ['"הדרכים הצטלבו והכרנו."','D'],
+        ['"לא באת לעולם כדי להתנצל."','A'],
+        ['"לנשום את הרגע."','H'],
+        ['"את האחת ואת הכי שלי."','V'],
+        ['"בתוך ים גועש של רגש יש מבט אחד של שתיקה."','N'],
+      ]},
+    ],
+    results:{
+      K:{ name:'הקלאסית', words:'ישר · שכבות · מרוקע',
+        story:'יש קווים שאני בוחרת להשאיר ישרים.<br>לא כי אין בהם תנועה. כי התנועה שלהם בפנים.<br><br>זו הקולקציה של מי שיודעת מה מתאים לה.<br>של מי שנשארת נאמנה לעצמה, לדרך.',
+        song:'"לאהוב אותך כי את כפי שאת."', models:'JOJO STRAIGHT · SUN STRIPE · SOLO · GORMET' },
+      D:{ name:'הדינמית', words:'תנועתי · דינאמי',
+        story:'הקווים בקולקציה הזו נתפסו באמצע תנועה.<br>מתעקלים, ממשיכים, לא עוצרים.<br><br>זו הקולקציה של מי שהדרכים שלה נסללות תוך כדי הליכה.<br>של מי שתמיד בתנועה.',
+        song:'"הדרכים הצטלבו והכרנו."', models:'HOOK · DAFNIE · RIBBON · EMEEL · TLV' },
+      A:{ name:'ההרפתקנית', words:'גועש · מתפרץ',
+        story:'יש רגע בפיסול שבו הקו מתפרץ.<br>גועש, מסתלסל, לא מבקש רשות.<br><br>אני לא מרסנת אותו. אני הולכת איתו עד הסוף.<br>זו הקולקציה של מי שלא באה לעולם כדי להתנצל.',
+        song:'"מתכנסת לך בשקט בתוך להט פנימי."', models:'SHERRI · WRINKLE · HURICANE · PAULA GYPSY · LUKA' },
+      H:{ name:'ההוליסטית', words:'מפותל · רוקד',
+        story:'בקולקציה הזו אני מתחילה ממה שהטבע כבר פיסל.<br>אוונטורין. אגת. פנינים. עץ.<br><br>אני מוסיפה רק דבר אחד: קו שרוקד סביב האבן.<br>זו הקולקציה של מי שעוצרת לנשום את הרגע.',
+        song:'"כמה שמתחשק לי לפנק אותך… לנשום את הרגע."', models:'MANON · NUROO · CHLOE · ONDINE · JULIKA · CERISE' },
+      V:{ name:'הוורסטילית', words:'גמישות · רכות · מודולארי',
+        story:'המודולריים שלי נולדו ממשחק.<br>חלק שמתחבר. מתפרק. מחליף מקום.<br><br>אותו תכשיט, כל פעם אחרת.<br>זו הקולקציה של מי שלובשת הרבה תפקידים ונשארת האחת.',
+        song:'"את האחת ואת הכי שלי."', models:'JOJO MODULAR · EMMA MODULAR · RIBBON WAVE · PAULA · SPECIAL' },
+      N:{ name:'הנצחית', words:'אינסופי · מתמשך',
+        story:'יש קווים שאני מפסלת בלי התחלה ובלי סוף.<br>קו אחד מתמשך, שקט, שלא ממהר לשום מקום.<br><br>זו הקולקציה של הדברים שנשארים.<br>של נוכחות שמדברת בלי מילים.',
+        song:'"בתוך ים גועש של רגש יש מבט אחד של שתיקה."', models:'ELAINE · N-PEARLS · KANA · KORA · THEODORA · EMMA BOW' },
+    }
+  },
+
+  en: {
+    dir:'ltr',
+    introKicker:'Five short questions. No right or wrong answers. <span class="hand">Just you.</span>',
+    introH1:'Which movement is yours?',
+    introSub:'Every piece I sculpt is one of a kind, just like you.<br>I begin with a straight line and move with it through space.<br>It can stay straight, curl, spiral,<br>become a moment of infinity.<br><span class="hand">You have a line of your own, too.</span>',
+    startBtn:"Let's discover it together",
+    introNote:'Less than a minute. Your result waits at the end.',
+    aboutLink:'About me →',
+    aboutKicker:'ABOUT',
+    aboutText:'<span class="about-name">My name is Tali.</span>I am an artist, a mother, a partner,<br>and a woman with freedom of choice and awareness,<br>and I make every piece by hand.<br><br>Every movement in the jewelry represents, for me,<br>a deep line of consciousness moving through space.<br><br>I believe our life is a wonderful opportunity<br>to experience our feelings and desires.<br>And I believe with all my heart that to truly live them,<br>you must live in powerful wholeness with yourself.<br>To love who you are. Whole, but not perfect.<br><br>In the language of jewelry I root meaning into the world,<br>and pass a message to each woman:<br><span class="hand">love yourself as you are.</span><br><br>My sculptural line belongs to the strength within quiet,<br>the strength of presence.<br>I freeze a moment in time,<br>bringing the depth of movement into being, and giving it life.',
+    aboutCreed:'I believe every woman has a line of her own.<br>The freedom to choose it, and the freedom to live it and love it.',
+    aboutChoice:'The line of the piece you choose is like a signature of your own.<br>What you choose will belong to no one else. No two are alike.<br>Born once, under my hands, and yours alone.',
+    aboutBtn:'Discover my line',
+    siteLink:'To the OTILYAS site →',
+    resultKicker:'Your movement is',
+    songCredit:"From Tali's booklet",
+    modelsLabel:'The pieces chosen for your collection',
+    inviteP:'Would you like the full story of your collection to reach you?',
+    phName:'Your name',
+    phEmail:'Your email',
+    sendBtn:'Send me the story',
+    sendingBtn:'One moment…',
+    formErr:'Something went wrong. Try again?',
+    formNote:'No spam. Just stories, every now and then. You can unsubscribe anytime.',
+    doneH2:'Your story is on its way.',
+    doneP:'Check your inbox in a moment.<br><span class="hand">What you choose belongs only to you.</span>',
+    againBtn:'Take the quiz again',
+    backBtn:'Back',
+    musicHint:'Tap to listen',
+    questions:[
+      { q:'How do you enter a room?', opts:[
+        ['With quiet confidence. I know what suits me, and I stay true to it.','K'],
+        ['On the way, always. Already heading to the next room.','D'],
+        ["Without asking permission. Let them feel I've arrived.",'A'],
+        ['Slowly. First I breathe the room in, then I step inside.','H'],
+        ['Depends on the room. I adapt myself to it.','V'],
+        ['Quietly. My presence speaks for itself.','N'],
+      ]},
+      { q:'Which line is most like you?', opts:[
+        ['Straight. Clean. No unnecessary ornament.','K'],
+        ['Curving and continuing. Never stopping.','D'],
+        ['Bursting. Turbulent. Asking no permission.','A'],
+        ['Winding around something beautiful. Dancing with it.','H'],
+        ['Changing. Sometimes this way, sometimes that.','V'],
+        ['Infinite. With no beginning and no end.','N'],
+      ]},
+      { q:'Your morning begins with…', opts:[
+        ['The same precise ritual. The one that works.','K'],
+        ['A list. And then, moving.','D'],
+        ["Whatever comes. The morning doesn't yet know what awaits it.",'A'],
+        ['Quiet coffee. Breathing the moment in.','H'],
+        ['Depends what the day asks of me.','V'],
+        ['Like yesterday. The good things stay.','N'],
+      ]},
+      { q:'A good friend would say about you…', opts:[
+        ['"She stays true to herself. Always."','K'],
+        ['"You can’t keep up with her."','D'],
+        ['"She doesn’t apologize for who she is."','A'],
+        ['"Time slows a little beside her."','H'],
+        ['"A thousand women in one. And all of them her."','V'],
+        ['"Her word is her word. Even years later."','N'],
+      ]},
+      { q:'Which line is most yours?', opts:[
+        ['"You stayed true to yourself, to your path."','K'],
+        ['"The paths crossed and we met."','D'],
+        ['"You didn’t come into the world to apologize."','A'],
+        ['"To breathe the moment in."','H'],
+        ['"You are the one and my very own."','V'],
+        ['"Within a raging sea of emotion, one gaze of silence."','N'],
+      ]},
+    ],
+    results:{
+      K:{ name:'The Classic', words:'STRAIGHT · LAYERED · HAMMERED',
+        story:'There are lines I choose to keep straight.<br>Not because they lack movement. Their movement is within.<br><br>This is the collection of a woman who knows what suits her.<br>Who stays true to herself, to her path.',
+        song:'"To love you just as you are."', models:'JOJO STRAIGHT · SUN STRIPE · SOLO · GORMET' },
+      D:{ name:'The Dynamic', words:'MOVING · DYNAMIC',
+        story:'The lines in this collection were caught mid-movement.<br>Curving, continuing, never stopping.<br><br>This is the collection of a woman whose paths are paved as she walks.<br>Who is always in motion.',
+        song:'"The paths crossed and we met."', models:'HOOK · DAFNIE · RIBBON · EMEEL · TLV' },
+      A:{ name:'The Adventurous', words:'TURBULENT · BURSTING',
+        story:"There's a moment in sculpting when the line bursts free.<br>Turbulent, curling, asking no permission.<br><br>I don't restrain it. I go with it all the way.<br>This is the collection of a woman who didn't come to apologize.",
+        song:'"Gathering quietly within an inner blaze."', models:'SHERRI · WRINKLE · HURICANE · PAULA GYPSY · LUKA' },
+      H:{ name:'The Holistic', words:'WINDING · DANCING',
+        story:'Here I begin with what nature has already sculpted.<br>Aventurine. Agate. Pearls. Wood.<br><br>I add only one thing: a line that dances around the stone.<br>This is the collection of a woman who pauses to breathe the moment in.',
+        song:'"How I long to indulge you… to breathe the moment in."', models:'MANON · NUROO · CHLOE · ONDINE · JULIKA · CERISE' },
+      V:{ name:'The Versatile', words:'FLEXIBLE · SOFT · MODULAR',
+        story:'My modular pieces were born from play.<br>A part that connects. Comes apart. Changes place.<br><br>The same piece, different every time.<br>This is the collection of a woman who wears many roles and remains the one.',
+        song:'"You are the one and my very own."', models:'JOJO MODULAR · EMMA MODULAR · RIBBON WAVE · PAULA · SPECIAL' },
+      N:{ name:'The Eternal', words:'INFINITE · CONTINUOUS',
+        story:'There are lines I sculpt with no beginning and no end.<br>One continuous line, quiet, in no hurry to go anywhere.<br><br>This is the collection of the things that stay.<br>Of a presence that speaks without words.',
+        song:'"Within a raging sea of emotion, one gaze of silence."', models:'ELAINE · N-PEARLS · KANA · KORA · THEODORA · EMMA BOW' },
+    }
+  }
+};
+
+let LANG = 'he';
+let current = 0;
+const scores = { K:0, D:0, A:0, H:0, V:0, N:0 };
+const answers = [];
+let resultKey = null;
+
+function setText(id, html){ const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+function applyLang(lang){
+  LANG = lang;
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = t.dir;
+  // בורר
+  document.getElementById('langHe').classList.toggle('active', lang==='he');
+  document.getElementById('langEn').classList.toggle('active', lang==='en');
+  // פתיחה
+  setText('introKicker', t.introKicker);
+  setText('introH1', t.introH1);
+  setText('introSub', t.introSub);
+  setText('startBtn', t.startBtn);
+  setText('introNote', t.introNote);
+  setText('aboutLink', t.aboutLink);
+  // עליי
+  setText('aboutKicker', t.aboutKicker);
+  setText('aboutText', t.aboutText);
+  setText('aboutCreed', t.aboutCreed);
+  setText('aboutChoice', t.aboutChoice);
+  setText('aboutBtn', t.aboutBtn);
+  setText('siteLink', t.siteLink);
+  // תוצאה + טופס (טקסטים קבועים)
+  setText('resultKicker', t.resultKicker);
+  setText('songCredit', t.songCredit);
+  setText('modelsLabel', t.modelsLabel);
+  setText('inviteP', t.inviteP);
+  setText('formNote', t.formNote);
+  document.getElementById('fname').placeholder = t.phName;
+  document.getElementById('femail').placeholder = t.phEmail;
+  document.getElementById('sendbtn').textContent = t.sendBtn;
+  document.getElementById('formerr').textContent = t.formErr;
+  // סיום
+  setText('doneH2', t.doneH2);
+  setText('doneP', t.doneP);
+  setText('againBtn', t.againBtn);
+  setText('musicHint', t.musicHint);
+  // רענון תוכן דינמי אם מוצג
+  if (document.getElementById('quiz').classList.contains('on')) renderQuestion();
+  if (document.getElementById('result').classList.contains('on') && resultKey) fillResult();
+}
+
+function setLang(lang){ applyLang(lang); }
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById(id);
+  el.classList.remove('on');
+  void el.offsetWidth;
+  el.classList.add('on');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function startQuiz(){ current = 0; answers.length = 0; renderQuestion(); show('quiz'); }
+
+function renderQuestion(){
+  const item = T[LANG].questions[current];
+  document.getElementById('qnum').textContent = '№ ' + (current+1) + ' / ' + T[LANG].questions.length;
+  document.getElementById('qfill').style.width = ((current) / T[LANG].questions.length * 100) + '%';
+  const shuffled = item.opts.map((o)=>({o, r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.o);
+  const body = document.getElementById('qbody');
+  body.innerHTML = '<div class="q">' + item.q + '</div><div class="opts">' +
+    shuffled.map(o => '<button class="opt" data-t="' + o[1] + '">' + o[0] + '</button>').join('') + '</div>' +
+    (current > 0 ? '<div class="backwrap"><button class="back-btn" onclick="goBack()">' + T[LANG].backBtn + '</button></div>' : '');
+  body.querySelectorAll('.opt').forEach(btn => btn.addEventListener('click', () => pick(btn)));
+}
+
+function pick(btn){
+  btn.classList.add('picked');
+  scores[btn.dataset.t]++;
+  answers[current] = btn.dataset.t;
+  document.getElementById('qfill').style.width = ((current+1) / T[LANG].questions.length * 100) + '%';
+  setTimeout(() => {
+    current++;
+    if (current < T[LANG].questions.length) renderQuestion();
+    else showResult();
+  }, 420);
+}
+
+function goBack(){
+  if (current === 0) return;
+  current--;
+  const prev = answers[current];
+  if (prev){ scores[prev]--; answers[current] = null; }
+  renderQuestion();
+}
+
+function fillResult(){
+  const r = T[LANG].results[resultKey];
+  document.getElementById('rname').textContent = r.name;
+  document.getElementById('rwords').textContent = r.words;
+  document.getElementById('rstory').innerHTML = r.story;
+  document.getElementById('rsong').textContent = r.song;
+  document.getElementById('rmodels').textContent = r.models;
+}
+
+function showResult(){
+  resultKey = Object.keys(scores).reduce((a,b) => scores[b] > scores[a] ? b : a);
+  fillResult();
+  show('result');
+}
+
+async function subscribe(ev){
+  ev.preventDefault();
+  const btn = document.getElementById('sendbtn');
+  const err = document.getElementById('formerr');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = T[LANG].sendingBtn;
+  const payload = {
+    data: {
+      type: 'subscription',
+      attributes: {
+        custom_source: 'שאלון הטמפרמנט — פיילוט',
+        profile: {
+          data: {
+            type: 'profile',
+            attributes: {
+              email: document.getElementById('femail').value.trim(),
+              first_name: document.getElementById('fname').value.trim(),
+              properties: {
+                temperament: CANON[resultKey],
+                temperament_key: resultKey,
+                quiz_lang: LANG,
+                quiz_source: 'pilot-2026-07'
+              }
+            }
+          }
+        }
+      },
+      relationships: { list: { data: { type: 'list', id: KLAVIYO_LIST_ID } } }
+    }
+  };
+  try {
+    const res = await fetch('https://a.klaviyo.com/client/subscriptions/?company_id=' + KLAVIYO_COMPANY_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'revision': '2025-04-15' },
+      body: JSON.stringify(payload)
+    });
+    if (res.status === 202) { show('done'); return false; }
+    throw new Error('status ' + res.status);
+  } catch (e) {
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = T[LANG].sendBtn;
+  }
+  return false;
+}
+
+// ===== פסנתר גנרטיבי בהשראת יורימה (Web Audio) — צליל פסנתר אמיתי, זורם, לא חוזר =====
+// סינתזה אדיטיבית עם הרמוניות פסנתר + מעטפת פרקוסיבית + ריברב אולם. ליווי יד-שמאל מתגלגל + מלודיה שרה.
+let audioCtx=null, master=null, reverbSend=null, analyser=null, waveData=null, musicOn=true, schedTimer=null, loopStart=0;
+
+const PARTIALS = [{m:1,a:1.0,d:1.0},{m:2.01,a:0.45,d:0.7},{m:3.02,a:0.25,d:0.5},{m:4.03,a:0.12,d:0.4}];
+function clamp(v,lo,hi){ return v<lo?lo:v>hi?hi:v; }
+
+// ===== לחן OTILYAS — נעימת פסנתר מקורית (רומנטית, בהשראת יורימה) =====
+// יד שמאל: ארפג'ו שבור מתגלגל · יד ימין: מלודיה ששרה · מבנה A + B, בלולאה שמתפתחת.
+const VOICE = {
+  C:[130.81,196.00,261.63,329.63], G:[98.00,146.83,196.00,246.94],
+  Am:[110.00,164.81,220.00,261.63], F:[87.31,130.81,174.61,220.00],
+};
+const BARS = ['C','G','Am','F','C','G','F','G',  'F','C','G','Am','F','C','G','G'];
+const LHPAT = [0,1,2,3,2,1,2,3];
+const N = {F4:349.23,G4:392.00,A4:440.00,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
+const MELODY = [
+  // A — התֵּמה
+  {b:0,f:N.E5,d:1.5},{b:1.5,f:N.D5,d:0.5},{b:2,f:N.C5,d:1},{b:3,f:N.E5,d:1},
+  {b:4,f:N.D5,d:2},{b:6,f:N.B4,d:1},{b:7,f:N.D5,d:1},
+  {b:8,f:N.C5,d:1.5},{b:9.5,f:N.B4,d:0.5},{b:10,f:N.A4,d:1},{b:11,f:N.C5,d:1},
+  {b:12,f:N.A4,d:2},{b:14,f:N.G4,d:1},{b:15,f:N.A4,d:1},
+  {b:16,f:N.G4,d:1},{b:17,f:N.A4,d:1},{b:18,f:N.C5,d:1},{b:19,f:N.E5,d:1},
+  {b:20,f:N.D5,d:2},{b:22,f:N.G4,d:1},{b:23,f:N.B4,d:1},
+  {b:24,f:N.A4,d:1.5},{b:25.5,f:N.G4,d:0.5},{b:26,f:N.F4,d:1},{b:27,f:N.A4,d:1},
+  {b:28,f:N.G4,d:2.5},{b:30.5,f:N.D5,d:1.5},
+  // B — התרוממות
+  {b:32,f:N.C5,d:1},{b:33,f:N.D5,d:1},{b:34,f:N.E5,d:1},{b:35,f:N.F5,d:1},
+  {b:36,f:N.E5,d:2},{b:38,f:N.G5,d:1},{b:39,f:N.E5,d:1},
+  {b:40,f:N.D5,d:1.5},{b:41.5,f:N.E5,d:0.5},{b:42,f:N.D5,d:1},{b:43,f:N.B4,d:1},
+  {b:44,f:N.C5,d:2},{b:46,f:N.A4,d:2},
+  {b:48,f:N.A4,d:1},{b:49,f:N.C5,d:1},{b:50,f:N.F5,d:1},{b:51,f:N.E5,d:1},
+  {b:52,f:N.E5,d:2},{b:54,f:N.D5,d:1},{b:55,f:N.C5,d:1},
+  {b:56,f:N.D5,d:1.5},{b:57.5,f:N.C5,d:0.5},{b:58,f:N.B4,d:1},{b:59,f:N.D5,d:1},
+  {b:60,f:N.C5,d:2.5},{b:62.5,f:N.G4,d:1.5},
+];
+const SPB = 0.82;          // שנייה לפעימה (~73 BPM, איטי ורגשי)
+const LOOP_BEATS = 64;     // 16 תיבות
+
+function makeReverb(sec,decay){
+  const rate=audioCtx.sampleRate, len=(rate*sec)|0, buf=audioCtx.createBuffer(2,len,rate);
+  for(let ch=0;ch<2;ch++){ const d=buf.getChannelData(ch); for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay); } }
+  const c=audioCtx.createConvolver(); c.buffer=buf; return c;
+}
+
+function initAudio(){
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  master = audioCtx.createGain();
+  const comp = audioCtx.createDynamicsCompressor();
+  comp.threshold.value=-16; comp.knee.value=22; comp.ratio.value=3; comp.attack.value=0.004; comp.release.value=0.25;
+  const makeup = audioCtx.createGain(); makeup.gain.value=1.35;
+  master.connect(comp); comp.connect(makeup); makeup.connect(audioCtx.destination);
+  master.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  master.gain.exponentialRampToValueAtTime(0.42, audioCtx.currentTime + 4); // כניסה רכה, נוכחת
+  const rev=makeReverb(2.8,2.2), rg=audioCtx.createGain(); rg.gain.value=0.26;
+  rev.connect(rg); rg.connect(master); reverbSend=rev;                        // ריברב אולם
+  analyser=audioCtx.createAnalyser(); analyser.fftSize=1024; master.connect(analyser);
+  waveData=new Float32Array(analyser.fftSize);
+  loopStart = audioCtx.currentTime + 0.5;
+  const _h = document.getElementById('musicHint'); if (_h) _h.classList.add('gone'); // החיווי נעלם משהתחיל
+  scheduler();
+}
+
+// צליל פסנתר: הרמוניות מתכווצות + נגיעה פרקוסיבית + פילטר שמתעמעם
+function piano(freq,start,dur,vel){
+  const out=audioCtx.createGain(); out.gain.value=vel; out.connect(master); if(reverbSend) out.connect(reverbSend);
+  const lp=audioCtx.createBiquadFilter(); lp.type='lowpass';
+  lp.frequency.setValueAtTime(4600,start); lp.frequency.exponentialRampToValueAtTime(1300, start+Math.min(dur,2.4)*0.7);
+  lp.connect(out);
+  PARTIALS.forEach(p=>{
+    const o=audioCtx.createOscillator(); o.type='sine'; o.frequency.value=freq*p.m;
+    const g=audioCtx.createGain(); const dd=Math.max(0.4,dur*p.d);
+    g.gain.setValueAtTime(0.0001,start);
+    g.gain.exponentialRampToValueAtTime(p.a, start+0.004);   // נקישת פטיש
+    g.gain.exponentialRampToValueAtTime(0.0001, start+dd);   // דעיכה טבעית
+    o.connect(g); g.connect(lp); o.start(start); o.stop(start+dd+0.1);
+  });
+}
+
+// קולות מלאכיות — מקהלת "אה" אתרית (פורמנטים + ויברטו + ריברב)
+const PAD = { C:[659.25,783.99], G:[493.88,587.33], Am:[523.25,659.25], F:[440.00,523.25] };
+function choir(freq,start,dur,vel){
+  const out=audioCtx.createGain();
+  out.gain.setValueAtTime(0.0001,start);
+  out.gain.exponentialRampToValueAtTime(vel, start+0.8);                    // כניסה רכה מאוד
+  out.gain.setValueAtTime(vel, start+Math.max(0.9,dur-1.1));
+  out.gain.exponentialRampToValueAtTime(0.0001, start+dur);                 // יציאה רכה
+  const f1=audioCtx.createBiquadFilter(); f1.type='bandpass'; f1.frequency.value=800;  f1.Q.value=6;
+  const f2=audioCtx.createBiquadFilter(); f2.type='bandpass'; f2.frequency.value=1150; f2.Q.value=9;   // פורמנטים של "אה"
+  f1.connect(out); f2.connect(out); out.connect(master); if(reverbSend) out.connect(reverbSend);
+  const lfo=audioCtx.createOscillator(); lfo.frequency.value=5.2; const lg=audioCtx.createGain(); lg.gain.value=4; lfo.connect(lg); // ויברטו
+  [-7,0,7].forEach(det=>{
+    const o=audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value=freq; o.detune.value=det;
+    lg.connect(o.detune); o.connect(f1); o.connect(f2);
+    o.start(start); o.stop(start+dur+0.2);
+  });
+  lfo.start(start); lfo.stop(start+dur+0.2);
+}
+
+function rnd(a,b){ return a+Math.random()*(b-a); }
+function rpick(a){ return a[(Math.random()*a.length)|0]; }  // שם ייחודי — לא להתנגש עם pick() של השאלון
+
+// ===== לחן שמימי בהשראת ENYA — פדים עשירים · מקהלת מלאכיות · נגיעות פסנתר צפות =====
+const CH = {
+  C:  {pad:[130.81,196.00,261.63,329.63,587.33], choir:[659.25,783.99], bell:[523.25,659.25,783.99]},
+  Am: {pad:[110.00,164.81,220.00,261.63,493.88], choir:[523.25,659.25], bell:[440.00,523.25,659.25]},
+  F:  {pad:[87.31,130.81,174.61,220.00,392.00],  choir:[440.00,523.25], bell:[523.25,698.46,440.00]},
+  G:  {pad:[98.00,146.83,196.00,246.94,440.00],  choir:[493.88,587.33], bell:[587.33,392.00,493.88]},
+};
+const CHORDS2 = ['C','Am','F','G','Am','F','C','G'];
+const HOLD = 7, OVER = 2.5;
+
+// פד — גלי סינוס טהורים בלבד (חלק, לא צורם), שני קולות מעט מכוונים לחמימות
+function pad(freq,start,dur,vel){
+  [-4,4].forEach(det=>{
+    const o=audioCtx.createOscillator(); o.type='sine'; o.frequency.value=freq; o.detune.value=det;
+    const g=audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001,start);
+    g.gain.exponentialRampToValueAtTime(vel, start+2.2);                 // כניסה איטית
+    g.gain.setValueAtTime(vel, start+Math.max(2.3,dur-3.2));
+    g.gain.exponentialRampToValueAtTime(0.0001, start+dur);             // יציאה איטית → קרוספייד
+    o.connect(g); g.connect(master); if(reverbSend) g.connect(reverbSend);
+    o.start(start); o.stop(start+dur+0.3);
+  });
+}
+// נגיעה צפה — פעמון סינוס רך (בלי הרמוניות = בלי צרימה)
+function bell(freq,start,dur,vel){
+  const o=audioCtx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001,start);
+  g.gain.exponentialRampToValueAtTime(vel, start+0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+  o.connect(g); g.connect(master); if(reverbSend) g.connect(reverbSend);
+  o.start(start); o.stop(start+dur+0.2);
+}
+
+function playPiece(t0){
+  for (let i=0;i<CHORDS2.length;i++){
+    const c=CH[CHORDS2[i]], t=t0 + i*HOLD;
+    c.pad.forEach(f => pad(f, t, HOLD+OVER, 0.05));    // פד סינוס רך ומתמשך
+    bell(rpick(c.bell), t + 2.8, 5.0, 0.08);            // נגיעה צפה
+    if (Math.random()<0.5) bell(rpick(c.bell), t + 5.2, 4.0, 0.06);
+  }
+}
+
+function scheduler(){
+  if (!audioCtx || !musicOn) return;
+  const loopDur = CHORDS2.length * HOLD;
+  while (loopStart < audioCtx.currentTime + 2.0){   // מתזמן את המחזור הבא מראש
+    playPiece(loopStart);
+    loopStart += loopDur;
+  }
+  schedTimer = setTimeout(scheduler, 800);
+}
+
+function setMusic(on){
+  musicOn = on;
+  const btn = document.getElementById('musicBtn');
+  if (on){
+    btn.classList.add('on');
+    if (!audioCtx){ initAudio(); }
+    else { audioCtx.resume(); master.gain.exponentialRampToValueAtTime(0.42, audioCtx.currentTime + 1.5);
+           if (!schedTimer){ loopStart = audioCtx.currentTime + 0.3; scheduler(); } }
+  } else {
+    btn.classList.remove('on');
+    if (master){ master.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.0); }
+    clearTimeout(schedTimer); schedTimer = null;
+  }
+}
+function toggleMusic(){ setMusic(!musicOn); }
+
+// התחלה בנגיעה ראשונה (הדפדפן דורש אינטראקציה לפני אודיו)
+function firstGesture(){
+  if (musicOn && !audioCtx){ initAudio(); }
+  document.removeEventListener('click', firstGesture);
+  document.removeEventListener('touchstart', firstGesture);
+}
+document.addEventListener('click', firstGesture);
+document.addEventListener('touchstart', firstGesture);
+
+// ===== פסי סאונד שזזים עם המוזיקה =====
+const _cv=document.getElementById('musicWave'), _cx=_cv.getContext('2d');
+const _BINS=[2,3,5,8,12,18], _barH=[.12,.12,.12,.12,.12,.12]; let _freq=null;
+function drawWave(){
+  requestAnimationFrame(drawWave);
+  const w=_cv.width, h=_cv.height, n=_BINS.length;
+  _cx.clearRect(0,0,w,h);
+  _cx.fillStyle = musicOn ? '#171512' : '#9b958a';
+  if (analyser && musicOn){ if(!_freq) _freq=new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(_freq); }
+  const bw = Math.max(2.5, w*0.028), gap=(w - n*bw)/(n+1); // דק ומינימליסטי
+  for (let i=0;i<n;i++){
+    let target = 0.10;
+    if (analyser && musicOn && _freq) target = Math.max(0.10, Math.min(1, _freq[_BINS[i]]/205));
+    _barH[i] += (target - _barH[i]) * 0.28;         // תנועה חלקה עם המוזיקה
+    const bh = Math.max(3, _barH[i]*(h-8));
+    const x = gap + i*(bw+gap), y=(h-bh)/2, r=Math.min(bw/2, bh/2);
+    _cx.beginPath();
+    if (_cx.roundRect) _cx.roundRect(x,y,bw,bh,r); else _cx.rect(x,y,bw,bh);
+    _cx.fill();
+  }
+}
+drawWave();
+
+// אתחול — ברירת מחדל עברית
+applyLang('he');
+</script>
+</body>
+</html>
